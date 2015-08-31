@@ -72,7 +72,7 @@ public class JSBundle {
         System.out.println();
         System.out.println();
         System.out.println();
-        System.out.println("RUNNING BUNDLE ON " + args[0]);
+        System.out.println("RUNNING " + ext + " BUNDLE ON " + args[0]);
         File file = new File(args[0]).getAbsoluteFile();
         common = file.getAbsolutePath().contains("common");
         desktop = file.getAbsolutePath().contains("desktop");
