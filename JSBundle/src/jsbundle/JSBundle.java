@@ -81,8 +81,6 @@ public class JSBundle {
        }
        if (verbose) {
           System.out.println("Running " + ext + " bundle on " + args[0] + "... ");
-       } else {
-          System.out.print("Running " + ext + " bundle on " + args[0] + "... ");
        }
         File file = new File(args[0]).getAbsoluteFile();
         common = file.getAbsolutePath().contains("common");
@@ -101,9 +99,12 @@ public class JSBundle {
         parsed.add(html);
         parse(parsed);
         if (parsed.size() == 1) {
+           if (verbose) {
             System.out.println("no " + ext + " tags, done");
+           }
             return;
         }
+        System.out.print("Bundling " + ext + " on" + args[0] + "... ");
         merge(parsed);
         try (FileOutputStream rewrite = new FileOutputStream(file)) {
             parsed.parallelStream().map(o -> {
