@@ -25,14 +25,14 @@ import java.util.logging.Logger;
  */
 public class JSBundle {
     public static String getHTML(File f) {
-        System.out.println("Loading into memory " + f.getAbsolutePath());
+        System.out.print("Loading into memory " + f.getAbsolutePath() + "... ");
         FileInputStream in = null;
         try {
             in = new FileInputStream(f);
             byte[] x = new byte[in.available()];
             in.read(x);
             String resp = new String(x);
-            System.out.println("Done loading into memory " + f.getAbsolutePath());
+            System.out.println("done");
             return resp;
         } catch (FileNotFoundException ex) {
             Logger.getLogger(JSBundle.class.getName()).log(Level.SEVERE, null, ex);
@@ -49,7 +49,7 @@ public class JSBundle {
                 Logger.getLogger(JSBundle.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        throw new IllegalStateException("Unable to load " + f);
+        throw new IllegalStateException("unable to load " + f);
     }
     static boolean mobile;
     static boolean desktop;
@@ -70,9 +70,7 @@ public class JSBundle {
             }
         }
         System.out.println();
-        System.out.println();
-        System.out.println();
-        System.out.println("RUNNING " + ext + " BUNDLE ON " + args[0]);
+        System.out.println("Running " + ext + " bundle on " + args[0]);
         File file = new File(args[0]).getAbsoluteFile();
         common = file.getAbsolutePath().contains("common");
         desktop = file.getAbsolutePath().contains("desktop");
@@ -83,7 +81,6 @@ public class JSBundle {
         } else {
             base = file.getAbsoluteFile().getParentFile().getParentFile().getParentFile();
         }
-        System.out.println("Base: " + base);
         String html = getHTML(file);
         ArrayList<Object> parsed = new ArrayList<>();
         parsed.add(html);
@@ -92,7 +89,6 @@ public class JSBundle {
             System.out.println("No <script> tags in " + args[0] + ", returning");
             return;
         }
-        System.out.println(parsed);
         merge(parsed);
         try (FileOutputStream rewrite = new FileOutputStream(file)) {
             parsed.parallelStream().map(o -> {
@@ -121,10 +117,6 @@ public class JSBundle {
             Logger.getLogger(JSBundle.class.getName()).log(Level.SEVERE, null, ex);
         }
         System.out.println("DONE MERGING " + args[0]);
-        //System.out.println(parsed);
-        System.out.println();
-        System.out.println();
-        System.out.println();
     }
     public static void merge(ArrayList<Object> parsed) {
         for (int i = 0; i < parsed.size(); i++) {
