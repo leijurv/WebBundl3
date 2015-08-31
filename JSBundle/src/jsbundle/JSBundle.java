@@ -103,17 +103,19 @@ public class JSBundle {
                     ((Merged) o).save();
                 }
                 return o;
-            }).forEachOrdered((o) -> {
-                try {
+            }).map((o) -> {
                     if (o instanceof Merged) {
-                        rewrite.write(((Merged) o).toHTML().getBytes());
+                        return (((Merged) o).toHTML().getBytes());
                     } else {
                         if (o instanceof ScriptTag) {
-                            rewrite.write(((ScriptTag) o).toHTML().getBytes());
+                            return (((ScriptTag) o).toHTML().getBytes());
                         } else {
-                            rewrite.write(((String) o).getBytes());
+                            return ((String) o).getBytes();
                         }
                     }
+            }).forEachOrdered(o->{
+                try {
+                    rewrite.write(o);
                 } catch (IOException ex) {
                     Logger.getLogger(JSBundle.class.getName()).log(Level.SEVERE, null, ex);
                 }
