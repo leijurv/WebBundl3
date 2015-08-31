@@ -104,7 +104,7 @@ public class JSBundle {
            }
             return;
         }
-        System.out.print("Bundling " + ext + " on" + args[0] + "... ");
+        System.out.print("Bundling " + ext + " in " + args[0] + "... ");
         merge(parsed);
         try (FileOutputStream rewrite = new FileOutputStream(file)) {
             parsed.parallelStream().map(o -> {
