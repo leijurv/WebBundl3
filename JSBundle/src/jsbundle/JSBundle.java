@@ -25,14 +25,18 @@ import java.util.logging.Logger;
  */
 public class JSBundle {
     public static String getHTML(File f) {
+       if (verbose) {
         System.out.print("Loading into memory " + f.getAbsolutePath() + "... ");
+       }
         FileInputStream in = null;
         try {
             in = new FileInputStream(f);
             byte[] x = new byte[in.available()];
             in.read(x);
             String resp = new String(x);
+            if (verbose) {
             System.out.println("done");
+            }
             return resp;
         } catch (FileNotFoundException ex) {
             Logger.getLogger(JSBundle.class.getName()).log(Level.SEVERE, null, ex);
@@ -75,7 +79,11 @@ public class JSBundle {
            System.out.println("Error! Missing '--css' or '--js'");
            return;
        }
-        System.out.println("Running " + ext + " bundle on " + args[0]);
+       if (verbose) {
+          System.out.println("Running " + ext + " bundle on " + args[0] + "... ");
+       } else {
+          System.out.print("Running " + ext + " bundle on " + args[0] + "... ");
+       }
         File file = new File(args[0]).getAbsoluteFile();
         common = file.getAbsolutePath().contains("common");
         desktop = file.getAbsolutePath().contains("desktop");
@@ -93,7 +101,7 @@ public class JSBundle {
         parsed.add(html);
         parse(parsed);
         if (parsed.size() == 1) {
-            System.out.println("No " + ext + " tags, returning");
+            System.out.println("no " + ext + " tags, done");
             return;
         }
         merge(parsed);
