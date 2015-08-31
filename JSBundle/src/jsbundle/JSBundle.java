@@ -56,26 +56,33 @@ public class JSBundle {
     static boolean common;
     static File base;
     static boolean js;
+    static boolean verbose;
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        String ext = args[1];
-        if (ext.equals("js")) {
-            js = true;
-        } else {
-            if (!ext.equals("css")) {
-                System.out.println("LOL YOU HAVE TO PUT EITHER 'css' OR 'js', YOU PUT '" + ext + "'");
-                return;
-            }
-        }
-        System.out.println();
+       String ext;
+       if (Arrays.asList(args).contains("-v")) {
+          verbose = true;
+          System.out.println("Running WebBundl3 in verbose mode");
+       }
+       if (Arrays.asList(args).contains("--css") || Arrays.asList(args).contains("-c")) {
+          ext = "css";
+       } else if (Arrays.asList(args).contains("--js") || Arrays.asList(args).contains("-j")) {
+          js = true;
+           ext = "js";
+       } else {
+           System.out.println("Error! Missing '--css' or '--js'");
+           return;
+       }
         System.out.println("Running " + ext + " bundle on " + args[0]);
         File file = new File(args[0]).getAbsoluteFile();
         common = file.getAbsolutePath().contains("common");
         desktop = file.getAbsolutePath().contains("desktop");
         mobile = file.getAbsolutePath().contains("mobile");
-        System.out.println("Common: " + common + " Desktop: " + desktop + " Mobile: " + mobile);
+        if (verbose) {
+           System.out.println("Common: " + common + " Desktop: " + desktop + " Mobile: " + mobile);
+        }
         if (common) {
             base = file.getAbsoluteFile().getParentFile().getParentFile();
         } else {
@@ -86,7 +93,7 @@ public class JSBundle {
         parsed.add(html);
         parse(parsed);
         if (parsed.size() == 1) {
-            System.out.println("No <script> tags in " + args[0] + ", returning");
+            System.out.println("No " + ext + " tags, returning");
             return;
         }
         merge(parsed);
@@ -116,7 +123,7 @@ public class JSBundle {
         } catch (IOException ex) {
             Logger.getLogger(JSBundle.class.getName()).log(Level.SEVERE, null, ex);
         }
-        System.out.println("DONE MERGING " + args[0]);
+        System.out.println("done");
     }
     public static void merge(ArrayList<Object> parsed) {
         for (int i = 0; i < parsed.size(); i++) {
@@ -128,11 +135,15 @@ public class JSBundle {
                     }
                 }
                 j--;
+                if (verbose) {
                 System.out.println("Script tags from " + i + " to " + j);
+                }
                 if (i == j) {
                     continue;//ignore script tags on their own
                 }
+                if (verbose) {
                 System.out.println("Merging");
+                }
                 ScriptTag[] scriptTags = new ScriptTag[j - i + 1];
                 for (int k = i; k <= j; k++) {
                     scriptTags[k - i] = (ScriptTag) parsed.remove(i);
@@ -160,7 +171,9 @@ public class JSBundle {
                 String fullTag = html.substring(index, tagEnd + 1);
                 String x = scriptTag.toHTML();
                 if (!x.equals(fullTag)) {
+                   if (verbose) {
                     System.out.println("Hoping that " + fullTag + " and " + scriptTag.toHTML() + " are the same...");
+                   }
                 }
                 //System.out.println(fullTag);
                 //System.out.println(jsSource);
@@ -206,7 +219,9 @@ public class JSBundle {
             this.tags = tags;
             for (ScriptTag t : tags) {
                 if (common && t.src.contains("jquery")) {
-                    System.out.println("THIS IS JQUERY");
+                   if (verbose) {
+                    System.out.println("This is jQuery");
+                   }
                     isjquery = true;
                 }
             }
@@ -222,13 +237,19 @@ public class JSBundle {
         }
         public void save() {
             File output = getOutputFile(name);
+            if (verbose) {
             System.out.println("Writing " + this + " to " + output);
+            }
             try (FileOutputStream out = new FileOutputStream(output)) {
                 if (!common && js) {
                     out.write("(function(){".getBytes());
+                    if (verbose) {
                     System.out.println("Wrapping in (function(){");
+                    }
                 } else {
+                   if (verbose) {
                     System.out.println("NOT wrapping in (function(){");
+                   }
                 }
                 for (ScriptTag t : tags) {
                     out.write(t.getContents().getBytes());
@@ -275,7 +296,9 @@ public class JSBundle {
             return contents;
         }
         private String fetchContents() {
+           if (verbose) {
             System.out.println("FETCHING " + src);
+           }
             if (src.startsWith("http")) {
                 try {
                     return getText(src);
@@ -329,7 +352,9 @@ public class JSBundle {
         return -1;
     }
     public static String getText(String url) throws Exception {
+       if (verbose) {
         System.out.println("Loading into memory " + url);
+       }
         URL website = new URL(url);
         URLConnection connection = website.openConnection();
         InputStream in = connection.getInputStream();
@@ -340,7 +365,9 @@ public class JSBundle {
             out.write(x, 0, i);
         }
         String resp = new String(out.toByteArray());
+        if (verbose) {
         System.out.println("Done loading into memory " + url);
+        }
         return resp;
     }
 }
