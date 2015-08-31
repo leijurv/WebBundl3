@@ -156,7 +156,7 @@ public class JSBundle {
                 }
                 String jsSource = html.substring(index + o, end);
                 ScriptTag scriptTag = new ScriptTag(jsSource);
-                int tagEnd = html.indexOf(">", end + 3);
+                int tagEnd = (js?html.indexOf("t>", end + 3)+1:html.indexOf(">",end+3));
                 String fullTag = html.substring(index, tagEnd + 1);
                 String x = scriptTag.toHTML();
                 if (!x.equals(fullTag)) {
