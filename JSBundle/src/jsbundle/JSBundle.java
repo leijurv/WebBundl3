@@ -117,6 +117,7 @@ public class JSBundle {
         }
         System.out.print("Bundling " + ext + " in " + args[0] + "... ");
         merge(parsed);
+        parsed.parallelStream().filter(o -> (o instanceof Merged)).map(o -> (Merged) o).flatMap(o -> Arrays.asList(o.tags).parallelStream()).parallel().mapToInt(o -> o.getContents().length).distinct().count();
         try (FileOutputStream rewrite = new FileOutputStream(file)) {
             parsed.parallelStream().map(o -> {
                 if (o instanceof Merged) {
@@ -249,9 +250,6 @@ public class JSBundle {
             if (isjquery) {
                 System.out.println("This is jQuery");
             }
-            Arrays.asList(tags).parallelStream().map((t)
-                    -> t.getContents()
-            ).distinct().count();
             id = Math.abs(r.nextLong());
             name = (isjquery ? "j" : "") + "bundle_" + id + "." + ext;
         }
