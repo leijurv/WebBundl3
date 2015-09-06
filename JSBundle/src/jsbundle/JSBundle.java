@@ -76,6 +76,7 @@ public class JSBundle {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+        long start = System.currentTimeMillis();
         if (Arrays.asList(args).contains("-v")) {
             verbose = true;
             System.out.println("Running WebBundl3 in verbose mode");
@@ -146,7 +147,8 @@ public class JSBundle {
         } catch (IOException ex) {
             Logger.getLogger(JSBundle.class.getName()).log(Level.SEVERE, null, ex);
         }
-        System.out.println("done");
+        long done = System.currentTimeMillis();
+        System.out.println("done. Took " + (done - start) + "ms including everything.");
     }
 
     public static void merge(ArrayList<Object> parsed) {
