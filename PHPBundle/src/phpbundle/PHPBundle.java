@@ -85,11 +85,11 @@ public class PHPBundle {
 
     public static ArrayList<Object> parse(String aoeuaoeuaoeueoau) {
         String php = aoeuaoeuaoeueoau;
-        ArrayList<Object> cats = new ArrayList<Object>();
+        ArrayList<Object> cats = new ArrayList<>();
         int ind;
         while ((ind = php.indexOf("<?php")) != -1) {
             String before = php.substring(0, ind);
-            int end = php.indexOf("?>");
+            int end = php.indexOf("?>", ind);
             String during = php.substring(ind + 5, end == -1 ? php.length() : end);
             String after = (end == -1) ? "" : php.substring(end + 2, php.length());
             //System.out.println("Before: " + before);
