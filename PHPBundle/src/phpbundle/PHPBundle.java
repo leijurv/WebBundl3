@@ -12,9 +12,11 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  *
@@ -24,15 +26,25 @@ public class PHPBundle {
 
     static boolean verbose = true;
     static File base;
+    static HashMap<String, String> cache = new HashMap<>();
 
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        System.out.println("running phpbundle on " + args[0]);
-        File f = new File(args[0]).getAbsoluteFile();
-        base = f.getParentFile();
+        base = new File(args[0]).getAbsoluteFile();
+        Stream.of(base.listFiles()).
+                parallel().
+                filter(f -> f.getName().endsWith(".php")).
+                forEachOrdered(file -> {
+                    run(file);
+                });
+    }
+
+    public static void run(File f) {
+        System.out.println("running phpbundle on " + f);
         String contents = new String(getHTML(f));
+        cache.put(f.getAbsolutePath(), contents);
         //System.out.println(contents);
         ArrayList<Object> parsed = parse(contents);
         //System.out.println(parsed);
@@ -74,13 +86,26 @@ public class PHPBundle {
                 parsed.remove(i);
                 System.out.println(ref);
                 parsed.add(i, new PHPTag(before));
-                String path = base.toString() + "/" + ref;
-                System.out.println(path);
-                String refContents = new String(getHTML(new File(path)));
-                parsed.add(i + 1, refContents);
-                parsed.add(i + 2, new PHPTag(after));
+                parsed.add(i + 1, new PHPTag(after));
+                ArrayList<Object> temp = parse(getFileContents(ref));
+                resolveImports(temp);
+                parsed.addAll(i + 1, temp);
             }
         }
+    }
+
+    public static String getFileContents(String ref) {
+        String path = new File(base.toString() + "/" + ref).getAbsolutePath();
+        System.out.print(path);
+        String cached = cache.get(path);
+        if (cached != null) {
+            System.out.println("cached");
+            return cached;
+        }
+        System.out.println("fetching");
+        String refContents = new String(getHTML(new File(path)));
+        cache.put(path, refContents);
+        return refContents;
     }
 
     public static ArrayList<Object> parse(String aoeuaoeuaoeueoau) {
