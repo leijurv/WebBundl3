@@ -13,6 +13,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -32,17 +33,15 @@ public class PHPBundle {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+        long start = System.currentTimeMillis();
         base = new File(args[0]).getAbsoluteFile();
-        Stream.of(base.listFiles()).
-                parallel().
-                filter(f -> f.getName().endsWith(".php")).
-                forEachOrdered(file -> {
-                    run(file);
-                });
+        long amt = Stream.of(base.listFiles()).parallel().filter(f -> f.getName().endsWith(".php")).map(file -> run(file)).distinct().count();
+        long end = System.currentTimeMillis();
+        System.out.println("PHPBundle took " + (end - start) + "ms to bundle " + amt + " php files, including everything.");
     }
 
-    public static void run(File f) {
-        System.out.println("running phpbundle on " + f);
+    public static long run(File f) {
+        long start = System.currentTimeMillis();
         String contents = new String(getHTML(f));
         cache.put(f.getAbsolutePath(), contents);
         //System.out.println(contents);
@@ -58,7 +57,9 @@ public class PHPBundle {
         } catch (IOException ex) {
             Logger.getLogger(PHPBundle.class.getName()).log(Level.SEVERE, null, ex);
         }
-        System.out.println("done ");
+        long end = System.currentTimeMillis();
+        System.out.println("done running phpbundle on " + f + " after " + (end - start) + "ms");
+        return new Random().nextLong();
     }
 
     public static void resolveImports(ArrayList<Object> parsed) {
