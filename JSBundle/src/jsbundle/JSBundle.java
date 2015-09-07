@@ -110,10 +110,9 @@ public class JSBundle {
         ArrayList<Object> parsed = new ArrayList<>();
         parsed.add(html);
         parse(parsed);
-        if (parsed.size() == 1) {
-            if (verbose) {
-                System.out.println("no " + ext + " tags, done");
-            }
+        if (parsed.size() < 2) {
+            long time = System.currentTimeMillis();
+            System.out.println(args[0] + " has no " + ext + " tags, done. Took " + (time - start) + "ms including everything.");
             return;
         }
         System.out.print("Bundling " + ext + " in " + args[0] + "... ");
