@@ -91,7 +91,7 @@ public class PHPBundle {
             String before = php.substring(0, ind);
             int end = php.indexOf("?>");
             String during = php.substring(ind + 5, end);
-            String after = php.substring(end + 2, php.length());
+            String after = (end == -1) ? "" : php.substring(end + 2, php.length());
             //System.out.println("Before: " + before);
             //System.out.println("During: " + during);
             //System.out.println("After: " + after);
