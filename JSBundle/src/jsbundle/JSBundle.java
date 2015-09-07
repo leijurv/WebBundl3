@@ -77,6 +77,7 @@ public class JSBundle {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+        long start = System.currentTimeMillis();
         File b = new File(args[0]).getAbsoluteFile();
         File comm = new File(b.getPath() + "/common");
         File desk = new File(b.getPath() + "/desktop/for");
@@ -87,6 +88,8 @@ public class JSBundle {
             new JSBundle().run(new String[]{file.getAbsolutePath(), "--css"});
             new JSBundle().run(new String[]{file.getAbsolutePath(), "--js"});
         });
+        long end = System.currentTimeMillis();
+        System.out.println("JS&CSS Bundle took " + (end - start) + "ms including everything.");
     }
 
     public void run(String[] args) {
