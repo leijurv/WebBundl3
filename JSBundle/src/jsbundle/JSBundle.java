@@ -72,6 +72,7 @@ public class JSBundle {
     String searchString;
     String ext;
     Random r = new Random();
+    File file;
 
     /**
      * @param args the command line arguments
@@ -84,15 +85,19 @@ public class JSBundle {
         File mobi = new File(b.getPath() + "/mobile/for");
         ArrayList<File> toDo = Stream.of(new File[]{comm, desk, mobi}).parallel().flatMap(f -> Stream.of(f.listFiles())).parallel().filter(f -> f.getName().endsWith(".php")).collect(Collectors.toCollection(ArrayList::new));
         System.out.println("Files to bundle: " + toDo);
-        toDo.stream().forEach(file -> {
-            new JSBundle().run(file, true, false);
-            new JSBundle().run(file, false, false);
-        });
+        ArrayList<JSBundle> bundlers = toDo.stream().flatMap(f -> Stream.of(new JSBundle[]{new JSBundle(f, true, false), new JSBundle(f, false, false)})).collect(Collectors.toCollection(ArrayList::new));
+        bundlers.parallelStream().map(x -> x.run()).distinct().count();
         long end = System.currentTimeMillis();
         System.out.println("JS&CSS Bundle took " + (end - start) + "ms including everything to bundle " + toDo.size() + " php files.");
     }
 
-    public void run(File file, boolean js, boolean verbose) {
+    public JSBundle(File file, boolean js, boolean verbose) {
+        this.js = js;
+        this.verbose = verbose;
+        this.file = file;
+    }
+
+    public long run() {
         long start = System.currentTimeMillis();
         if (verbose) {
             verbose = true;
@@ -127,7 +132,7 @@ public class JSBundle {
         if (parsed.size() < 2) {
             long time = System.currentTimeMillis();
             System.out.println(file + " has no " + ext + " tags, done. Took " + (time - start) + "ms including everything.");
-            return;
+            return time - start;
         }
         merge(parsed);
         parsed.parallelStream().filter(o -> (o instanceof Merged)).map(o -> (Merged) o).flatMap(o -> Arrays.asList(o.tags).parallelStream()).parallel().mapToInt(o -> o.getContents().length).distinct().count();
@@ -161,6 +166,7 @@ public class JSBundle {
         }
         long done = System.currentTimeMillis();
         System.out.println("Done bundling " + ext + " in " + file + ". Took " + (done - start) + "ms including everything.");
+        return done - start;
     }
 
     public void merge(ArrayList<Object> parsed) {
