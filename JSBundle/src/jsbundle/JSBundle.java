@@ -88,7 +88,7 @@ public class JSBundle {
         ArrayList<JSBundle> bundlers = toDo.stream().flatMap(f -> Stream.of(new JSBundle[]{new JSBundle(f, true, false), new JSBundle(f, false, false)})).collect(Collectors.toCollection(ArrayList::new));
         bundlers.parallelStream().map(x -> x.run()).distinct().count();
         long end = System.currentTimeMillis();
-        System.out.println("JS&CSS Bundle took " + (end - start) + "ms including everything to bundle " + toDo.size() + " php files.");
+        System.out.println("WebBundle took " + (end - start) + "ms to bundle " + toDo.size() + " files.");
     }
 
     public JSBundle(File file, boolean js, boolean verbose) {
@@ -131,7 +131,9 @@ public class JSBundle {
         parse(parsed);
         if (parsed.size() < 2) {
             long time = System.currentTimeMillis();
-            System.out.println(file + " has no " + ext + " tags, done. Took " + (time - start) + "ms including everything.");
+            if (verbose) {
+               System.out.println(file + " has no " + ext + " tags, done. Took " + (time - start) + "ms including everything.");
+            }
             return time - start;
         }
         merge(parsed);
@@ -165,7 +167,9 @@ public class JSBundle {
             Logger.getLogger(JSBundle.class.getName()).log(Level.SEVERE, null, ex);
         }
         long done = System.currentTimeMillis();
-        System.out.println("Done bundling " + ext + " in " + file + ". Took " + (done - start) + "ms including everything.");
+        if (verbose) {
+            System.out.println("Done bundling " + ext + " in " + file + ". Took " + (done - start) + "ms including everything.");
+        }
         return done - start;
     }
 

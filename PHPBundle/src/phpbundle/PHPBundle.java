@@ -25,7 +25,7 @@ import java.util.stream.Stream;
  */
 public class PHPBundle {
 
-    static boolean verbose = true;
+    static boolean verbose = false;
     static File base;
     static HashMap<String, String> cache = new HashMap<>();
 
@@ -37,7 +37,7 @@ public class PHPBundle {
         base = new File(args[0]).getAbsoluteFile();
         long amt = Stream.of(base.listFiles()).parallel().filter(f -> f.getName().endsWith(".php")).map(file -> run(file)).distinct().count();
         long end = System.currentTimeMillis();
-        System.out.println("PHPBundle took " + (end - start) + "ms to bundle " + amt + " php files, including everything.");
+        System.out.println("PHPBundle took " + (end - start) + "ms to bundle " + amt + " php files.");
     }
 
     public static long run(File f) {
@@ -58,7 +58,9 @@ public class PHPBundle {
             Logger.getLogger(PHPBundle.class.getName()).log(Level.SEVERE, null, ex);
         }
         long end = System.currentTimeMillis();
-        System.out.println("done running phpbundle on " + f + " after " + (end - start) + "ms");
+        if (verbose) {
+            System.out.println("done running phpbundle on " + f + " after " + (end - start) + "ms");
+        }
         return new Random().nextLong();
     }
 
@@ -85,7 +87,9 @@ public class PHPBundle {
                     continue;
                 }
                 parsed.remove(i);
-                System.out.println(ref);
+                if (verbose) {
+                  System.out.println(ref);
+                }
                 parsed.add(i, new PHPTag(before));
                 parsed.add(i + 1, new PHPTag(after));
                 ArrayList<Object> temp = parse(getFileContents(ref));
@@ -97,13 +101,19 @@ public class PHPBundle {
 
     public static String getFileContents(String ref) {
         String path = new File(base.toString() + "/" + ref).getAbsolutePath();
-        System.out.print(path);
+        if (verbose) {
+            System.out.print(path);
+        }
         String cached = cache.get(path);
         if (cached != null) {
-            System.out.println("cached");
+           if (verbose) {
+            System.out.println(" cached");
+           }
             return cached;
         }
-        System.out.println("fetching");
+        if (verbose) {
+         System.out.println("fetching");
+        }
         String refContents = new String(getHTML(new File(path)));
         cache.put(path, refContents);
         return refContents;
