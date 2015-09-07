@@ -89,7 +89,7 @@ public class JSBundle {
             new JSBundle().run(new String[]{file.getAbsolutePath(), "--js"});
         });
         long end = System.currentTimeMillis();
-        System.out.println("JS&CSS Bundle took " + (end - start) + "ms including everything.");
+        System.out.println("JS&CSS Bundle took " + (end - start) + "ms including everything to bundle " + toDo.size() + " php files.");
     }
 
     public void run(String[] args) {
