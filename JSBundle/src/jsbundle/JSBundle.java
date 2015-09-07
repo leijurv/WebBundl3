@@ -129,7 +129,6 @@ public class JSBundle {
             System.out.println(args[0] + " has no " + ext + " tags, done. Took " + (time - start) + "ms including everything.");
             return;
         }
-        System.out.print("Bundling " + ext + " in " + args[0] + "... ");
         merge(parsed);
         parsed.parallelStream().filter(o -> (o instanceof Merged)).map(o -> (Merged) o).flatMap(o -> Arrays.asList(o.tags).parallelStream()).parallel().mapToInt(o -> o.getContents().length).distinct().count();
         try (FileOutputStream rewrite = new FileOutputStream(file)) {
@@ -161,7 +160,7 @@ public class JSBundle {
             Logger.getLogger(JSBundle.class.getName()).log(Level.SEVERE, null, ex);
         }
         long done = System.currentTimeMillis();
-        System.out.println("done. Took " + (done - start) + "ms including everything.");
+        System.out.println("Done bundling " + ext + " in " + args[0] + ". Took " + (done - start) + "ms including everything.");
     }
 
     public void merge(ArrayList<Object> parsed) {
