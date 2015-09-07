@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -27,7 +28,7 @@ import java.util.stream.Stream;
  */
 public class JSBundle {
 
-    public static byte[] getHTML(File f) {
+    public byte[] getHTML(File f) {
         if (verbose) {
             System.out.print("Loading into memory " + f.getAbsolutePath() + "... ");
         }
@@ -62,20 +63,33 @@ public class JSBundle {
         }
         throw new IllegalStateException("unable to load " + f);
     }
-    static boolean mobile;
-    static boolean desktop;
-    static boolean common;
-    static File base;
-    static boolean js;
-    static boolean verbose;
-    static String searchString;
-    static String ext;
-    static Random r = new Random();
+    boolean mobile;
+    boolean desktop;
+    boolean common;
+    File base;
+    boolean js;
+    boolean verbose;
+    String searchString;
+    String ext;
+    Random r = new Random();
 
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+        File b = new File(args[0]).getAbsoluteFile();
+        File comm = new File(b.getPath() + "/common");
+        File desk = new File(b.getPath() + "/desktop/for");
+        File mobi = new File(b.getPath() + "/mobile/for");
+        ArrayList<File> toDo = Stream.of(new File[]{comm, desk, mobi}).parallel().flatMap(f -> Stream.of(f.listFiles())).parallel().filter(f -> f.getName().endsWith(".php")).collect(Collectors.toCollection(ArrayList::new));
+        System.out.println("Files to bundle: " + toDo);
+        toDo.stream().forEach(file -> {
+            new JSBundle().run(new String[]{file.getAbsolutePath(), "--css"});
+            new JSBundle().run(new String[]{file.getAbsolutePath(), "--js"});
+        });
+    }
+
+    public void run(String[] args) {
         long start = System.currentTimeMillis();
         if (Arrays.asList(args).contains("-v")) {
             verbose = true;
@@ -150,7 +164,7 @@ public class JSBundle {
         System.out.println("done. Took " + (done - start) + "ms including everything.");
     }
 
-    public static void merge(ArrayList<Object> parsed) {
+    public void merge(ArrayList<Object> parsed) {
         for (int i = 0; i < parsed.size(); i++) {
             if (parsed.get(i) instanceof ScriptTag) {
                 int j;
@@ -178,7 +192,7 @@ public class JSBundle {
         }
     }
 
-    public static void parse(ArrayList<Object> parsed) {
+    public void parse(ArrayList<Object> parsed) {
         for (int i = 0; i < parsed.size(); i++) {
             if (parsed.get(i) instanceof String) {
                 String html = (String) parsed.get(i);
@@ -238,7 +252,7 @@ public class JSBundle {
         return true;
     }
 
-    public static class Merged {
+    public class Merged {
 
         final ScriptTag[] tags;
         final long id;
@@ -295,7 +309,7 @@ public class JSBundle {
         }
     }
 
-    public static File getOutputFile(String name) {
+    public File getOutputFile(String name) {
         if (common) {
             return new File(base.getAbsolutePath() + "/common/" + name);
         }
@@ -310,7 +324,7 @@ public class JSBundle {
         throw new IllegalStateException("your mom");
     }
 
-    public static class ScriptTag {
+    public class ScriptTag {
 
         final String src;
         byte[] contents = null;
@@ -386,7 +400,7 @@ public class JSBundle {
         return -1;
     }
 
-    public static byte[] getText(String url) throws Exception {
+    public byte[] getText(String url) throws Exception {
         if (verbose) {
             System.out.println("Loading into memory " + url);
         }
