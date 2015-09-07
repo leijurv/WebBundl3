@@ -44,12 +44,11 @@ public class PHPBundle {
         long start = System.currentTimeMillis();
         String contents = new String(getHTML(f));
         cache.put(f.getAbsolutePath(), contents);
-        //System.out.println(contents);
         ArrayList<Object> parsed = parse(contents);
-        //System.out.println(parsed);
         resolveImports(parsed);
-        //System.out.println(parsed);
-        String result = parsed.parallelStream().filter(x -> !isEmpty(x instanceof PHPTag ? ((PHPTag) x).contents : (String) x)).map(x -> (x instanceof PHPTag ? ((PHPTag) x).toHTML() : (String) x)).collect(Collectors.joining());
+        parsed = parsed.parallelStream().filter(x -> !isEmpty(x instanceof PHPTag ? ((PHPTag) x).contents : (String) x)).collect(Collectors.toCollection(ArrayList::new));
+        merge(parsed);
+        String result = parsed.parallelStream().map(x -> (x instanceof PHPTag ? ((PHPTag) x).toHTML() : (String) x)).collect(Collectors.joining());
         try (FileOutputStream out = new FileOutputStream(f)) {
             out.write(result.getBytes());
         } catch (FileNotFoundException ex) {
@@ -62,6 +61,22 @@ public class PHPBundle {
             System.out.println("done running phpbundle on " + f + " after " + (end - start) + "ms");
         }
         return new Random().nextLong();
+    }
+
+    public static void merge(ArrayList<Object> parsed) {
+        for (int i = 0; i < parsed.size() - 1; i++) {
+            if (parsed.get(i) instanceof String && parsed.get(i + 1) instanceof String) {
+                parsed.set(i, ((String) parsed.get(i)) + ((String) parsed.get(i + 1)));
+                parsed.remove(i + 1);
+                i--;
+                continue;
+            }
+            if (parsed.get(i) instanceof PHPTag && parsed.get(i + 1) instanceof PHPTag) {
+                parsed.set(i, new PHPTag(((PHPTag) parsed.get(i)).contents + ((PHPTag) parsed.get(i + 1)).contents));
+                parsed.remove(i + 1);
+                i--;
+            }
+        }
     }
 
     public static void resolveImports(ArrayList<Object> parsed) {
@@ -88,7 +103,7 @@ public class PHPBundle {
                 }
                 parsed.remove(i);
                 if (verbose) {
-                  System.out.println(ref);
+                    System.out.println(ref);
                 }
                 parsed.add(i, new PHPTag(before));
                 parsed.add(i + 1, new PHPTag(after));
@@ -106,13 +121,13 @@ public class PHPBundle {
         }
         String cached = cache.get(path);
         if (cached != null) {
-           if (verbose) {
-            System.out.println(" cached");
-           }
+            if (verbose) {
+                System.out.println(" cached");
+            }
             return cached;
         }
         if (verbose) {
-         System.out.println("fetching");
+            System.out.println("fetching");
         }
         String refContents = new String(getHTML(new File(path)));
         cache.put(path, refContents);
