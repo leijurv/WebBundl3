@@ -84,7 +84,7 @@ public class JSBundle {
         File desk = new File(b.getPath() + "/desktop/for");
         File mobi = new File(b.getPath() + "/mobile/for");
         ArrayList<File> toDo = Stream.of(new File[]{comm, desk, mobi}).parallel().flatMap(f -> Stream.of(f.listFiles())).parallel().filter(f -> f.getName().endsWith(".php")).collect(Collectors.toCollection(ArrayList::new));
-        System.out.println("Files to bundle: " + toDo);
+        //System.out.println("Files to bundle: " + toDo);
         ArrayList<JSBundle> bundlers = toDo.stream().flatMap(f -> Stream.of(new JSBundle[]{new JSBundle(f, true, false), new JSBundle(f, false, false)})).collect(Collectors.toCollection(ArrayList::new));
         bundlers.parallelStream().map(x -> x.run()).distinct().count();
         long end = System.currentTimeMillis();
@@ -271,7 +271,7 @@ public class JSBundle {
         public Merged(ScriptTag[] tags) {
             this.tags = tags;
             isjquery = common && Stream.of(tags).anyMatch(t -> t.src.contains("jquery"));//true if any of the tags contain the string "jquery"
-            if (isjquery) {
+            if (isjquery && verbose) {
                 System.out.println("This is jQuery");
             }
             id = Math.abs(r.nextLong());
