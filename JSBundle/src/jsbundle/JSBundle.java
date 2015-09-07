@@ -153,7 +153,7 @@ public class JSBundle {
                     return (((Merged) o).toHTML().getBytes());
                 } else {
                     if (o instanceof ScriptTag) {
-                        return (((ScriptTag) o).toHTML().getBytes());
+                        return (((ScriptTag) o).toHTML(true).getBytes());
                     } else {
                         return ((String) o).getBytes();
                     }
@@ -223,10 +223,10 @@ public class JSBundle {
                 ScriptTag scriptTag = new ScriptTag(jsSource);
                 int tagEnd = (js ? html.indexOf("t>", end + 3) + 2 : html.indexOf(">", end + 3) + 1);
                 String fullTag = html.substring(index, tagEnd);
-                String x = scriptTag.toHTML();
+                String x = scriptTag.toHTML(false);
                 if (!x.equals(fullTag)) {
                     if (verbose) {
-                        System.out.println("Hoping that " + fullTag + " and " + scriptTag.toHTML() + " are the same...");
+                        System.out.println("Hoping that " + fullTag + " and " + x + " are the same...");
                     }
                 }
                 //System.out.println(fullTag);
@@ -318,7 +318,7 @@ public class JSBundle {
         }
 
         public String toHTML() {
-            return new ScriptTag(name).toHTML();
+            return new ScriptTag(name).toHTML(!isjquery);
         }
     }
 
@@ -393,9 +393,10 @@ public class JSBundle {
             return "SCRIPT TAG " + src;
         }
 
-        public String toHTML() {
+        public String toHTML(boolean asyncdefer) {
+            asyncdefer = asyncdefer && !common;
             if (js) {
-                return "<script src=\"" + src + "\"></script>";
+                return "<script src=\"" + src + "\"" + (asyncdefer ? " async defer" : "") + "></script>";
             } else {
                 return "<link href=\"" + src + "\" rel=\"stylesheet\" />";
             }
