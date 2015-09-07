@@ -85,20 +85,24 @@ public class JSBundle {
         File mobi = new File(b.getPath() + "/mobile/for");
         ArrayList<File> toDo = Stream.of(new File[]{comm, desk, mobi}).parallel().flatMap(f -> Stream.of(f.listFiles())).parallel().filter(f -> f.getName().endsWith(".php")).collect(Collectors.toCollection(ArrayList::new));
         //System.out.println("Files to bundle: " + toDo);
-        ArrayList<JSBundle> bundlers = toDo.stream().flatMap(f -> Stream.of(new JSBundle[]{new JSBundle(f, true, false), new JSBundle(f, false, false)})).collect(Collectors.toCollection(ArrayList::new));
+        ArrayList<JSBundle> bundlers = toDo.stream().map(f -> new JSBundle(f, false)).collect(Collectors.toCollection(ArrayList::new));
         bundlers.parallelStream().map(x -> x.run()).distinct().count();
         long end = System.currentTimeMillis();
         System.out.println("WebBundle took " + (end - start) + "ms to bundle " + toDo.size() + " files.");
     }
 
-    public JSBundle(File file, boolean js, boolean verbose) {
-        this.js = js;
+    public JSBundle(File file, boolean verbose) {
         this.verbose = verbose;
         this.file = file;
     }
 
     public long run() {
+        return run(true) + run(false);
+    }
+
+    public long run(boolean j) {
         long start = System.currentTimeMillis();
+        js = j;
         if (verbose) {
             verbose = true;
             System.out.println("Running WebBundl3 in verbose mode");
@@ -132,7 +136,7 @@ public class JSBundle {
         if (parsed.size() < 2) {
             long time = System.currentTimeMillis();
             if (verbose) {
-               System.out.println(file + " has no " + ext + " tags, done. Took " + (time - start) + "ms including everything.");
+                System.out.println(file + " has no " + ext + " tags, done. Took " + (time - start) + "ms including everything.");
             }
             return time - start;
         }
