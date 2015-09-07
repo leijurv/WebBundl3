@@ -29,6 +29,7 @@ public class PHPBundle {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+        System.out.println("running phpbundle on " + args[0]);
         File f = new File(args[0]).getAbsoluteFile();
         base = f.getParentFile();
         String contents = new String(getHTML(f));
@@ -45,6 +46,7 @@ public class PHPBundle {
         } catch (IOException ex) {
             Logger.getLogger(PHPBundle.class.getName()).log(Level.SEVERE, null, ex);
         }
+        System.out.println("done ");
     }
 
     public static void resolveImports(ArrayList<Object> parsed) {
