@@ -85,33 +85,30 @@ public class JSBundle {
         ArrayList<File> toDo = Stream.of(new File[]{comm, desk, mobi}).parallel().flatMap(f -> Stream.of(f.listFiles())).parallel().filter(f -> f.getName().endsWith(".php")).collect(Collectors.toCollection(ArrayList::new));
         System.out.println("Files to bundle: " + toDo);
         toDo.stream().forEach(file -> {
-            new JSBundle().run(new String[]{file.getAbsolutePath(), "--css"});
-            new JSBundle().run(new String[]{file.getAbsolutePath(), "--js"});
+            new JSBundle().run(file, true, false);
+            new JSBundle().run(file, false, false);
         });
         long end = System.currentTimeMillis();
         System.out.println("JS&CSS Bundle took " + (end - start) + "ms including everything to bundle " + toDo.size() + " php files.");
     }
 
-    public void run(String[] args) {
+    public void run(File file, boolean js, boolean verbose) {
         long start = System.currentTimeMillis();
-        if (Arrays.asList(args).contains("-v")) {
+        if (verbose) {
             verbose = true;
             System.out.println("Running WebBundl3 in verbose mode");
         }
-        if (Arrays.asList(args).contains("--css") || Arrays.asList(args).contains("-c")) {
+        if (!js) {
+            js = false;
             ext = "css";
-        } else if (Arrays.asList(args).contains("--js") || Arrays.asList(args).contains("-j")) {
+        } else {
             js = true;
             ext = "js";
-        } else {
-            System.out.println("Error! Missing '--css' or '--js'");
-            return;
         }
         if (verbose) {
-            System.out.println("Running " + ext + " bundle on " + args[0] + "... ");
+            System.out.println("Running " + ext + " bundle on " + file + "... ");
         }
         searchString = "<" + (js ? "script src" : "link href") + "=\"";
-        File file = new File(args[0]).getAbsoluteFile();
         common = file.getAbsolutePath().contains("common");
         desktop = file.getAbsolutePath().contains("desktop");
         mobile = file.getAbsolutePath().contains("mobile");
@@ -129,7 +126,7 @@ public class JSBundle {
         parse(parsed);
         if (parsed.size() < 2) {
             long time = System.currentTimeMillis();
-            System.out.println(args[0] + " has no " + ext + " tags, done. Took " + (time - start) + "ms including everything.");
+            System.out.println(file + " has no " + ext + " tags, done. Took " + (time - start) + "ms including everything.");
             return;
         }
         merge(parsed);
@@ -163,7 +160,7 @@ public class JSBundle {
             Logger.getLogger(JSBundle.class.getName()).log(Level.SEVERE, null, ex);
         }
         long done = System.currentTimeMillis();
-        System.out.println("Done bundling " + ext + " in " + args[0] + ". Took " + (done - start) + "ms including everything.");
+        System.out.println("Done bundling " + ext + " in " + file + ". Took " + (done - start) + "ms including everything.");
     }
 
     public void merge(ArrayList<Object> parsed) {
